@@ -1,0 +1,9 @@
+
+{
+  "name": "PeerNXT",
+  "description": "A student counseling and community app for connecting students with professional counselors and peer ambassadors.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}

@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.env
+*.log
+.DS_Store
+serviceAccountKey.json
+google-calendar-credentials.json
+*.tsbuildinfo
