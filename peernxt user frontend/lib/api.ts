@@ -11,7 +11,11 @@ type ApiInit = Omit<RequestInit, 'headers' | 'body'> & {
   headers?: Record<string, string>;
 };
 
+let _tokenOverride: string | null = null;
+export function setTokenOverride(token: string | null): void { _tokenOverride = token; }
+
 async function getAccessToken(): Promise<string> {
+  if (_tokenOverride) return _tokenOverride;
   const { data, error } = await supabase.auth.getSession();
   if (error) throw error;
   const token = data.session?.access_token;
@@ -92,7 +96,10 @@ export const toAppUser = (apiUser: any) => {
   };
 };
 
-export async function bootstrapProfileForSession(roleHint: UserRole): Promise<any> {
+export async function bootstrapProfileForSession(
+  roleHint: UserRole,
+  authUser?: { id: string; email?: string; user_metadata?: Record<string, unknown> }
+): Promise<any> {
   try {
     const me = await apiRequest<any>('/users/me');
     return toAppUser(me);
@@ -106,9 +113,13 @@ export async function bootstrapProfileForSession(roleHint: UserRole): Promise<an
     if (!isMissingProfile) throw error;
   }
 
-  const { data } = await supabase.auth.getUser();
-  const user = data.user;
-  if (!user) throw new Error('No Supabase user found');
+  // Use passed-in auth user to avoid slow supabase.auth.getUser() network call.
+  let user = authUser;
+  if (!user) {
+    const { data } = await supabase.auth.getUser();
+    if (!data.user) throw new Error('No Supabase user found');
+    user = data.user;
+  }
 
   const created = await apiRequest<any>('/users/register', {
     method: 'POST',

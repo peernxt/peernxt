@@ -27,7 +27,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../App';
 import { apiRequest, parseApiError } from '../../lib/api';
 
-type TabId = 'home' | 'peer' | 'counselors' | 'community' | 'profile';
+type TabId = 'home' | 'peer' | 'community' | 'profile';
 type CounselorCard = {
   /** Supabase `users.id` when row came from the API directory */
   backendUserId?: string;
@@ -273,7 +273,6 @@ const NewStudentFrontend: React.FC = () => {
   const navItems: { id: TabId; label: string; icon: React.ComponentType<{ size?: number }> }[] = [
     { id: 'home', label: 'Home', icon: GraduationCap },
     { id: 'peer', label: 'Peer Ambassadors', icon: Users },
-    { id: 'counselors', label: 'Counselors', icon: UserIcon },
     { id: 'community', label: 'Community', icon: MessageSquare },
     { id: 'profile', label: 'Profile', icon: UserIcon },
   ];
@@ -523,10 +522,8 @@ const NewStudentFrontend: React.FC = () => {
       setIsLoadingData(true);
       setDataError(null);
       try {
-        // counselor-meetings excluded until counsellor flow is built (Phase 2 roadmap)
-        const [eventList, counselorsDirectory, ambassadorsDirectory] = await Promise.all([
+        const [eventList, ambassadorsDirectory] = await Promise.all([
           apiRequest<any[]>('/events?limit=6'),
-          apiRequest<DirectoryUser[]>('/users?role=agent'),
           apiRequest<DirectoryUser[]>('/users?role=ambassador'),
         ]);
         if (!isMounted) return;
@@ -547,34 +544,6 @@ const NewStudentFrontend: React.FC = () => {
         });
         if (mappedEvents.length > 0) setEvents(mappedEvents);
 
-        const mappedCounselors = (counselorsDirectory ?? []).slice(0, 8).map((user, idx) => {
-          const name = String(user.displayName ?? user.email ?? `Counselor ${idx + 1}`);
-          const profile = (user.profile ?? {}) as DirectoryUser['profile'];
-          const expertise = Array.isArray(profile.countriesExpertise) ? profile.countriesExpertise : [];
-          const specialties = expertise.length > 0 ? expertise.slice(0, 4).map((item) => String(item)) : ['USA', 'UK', 'Canada', 'Australia'];
-          const agency = String(profile.agencyName ?? 'PeerNXT Counseling');
-          return {
-            backendUserId: String(user.id),
-            name,
-            title: `Senior Counsellor â€¢ ${agency}`,
-            specialties,
-            headline: 'Admission and visa guidance specialist',
-            rating: 4.8,
-            studentsGuided: `${220 + idx * 30}+`,
-            responseTime: '< 3 hours',
-            languages: ['English', 'Hindi'],
-            about: String(profile.bio ?? 'Experienced counselor helping students through applications and visa journey.'),
-            experience: [`Senior Counsellor at ${agency}`],
-            education: ['International Education Specialist'],
-            certifications: ['PeerNXT Verified Counselor'],
-            nearestBranch: {
-              name: `${agency} Office`,
-              address: 'Nearest verified branch available after booking',
-              distance: 'Shown after location sharing',
-            },
-          } as CounselorCard;
-        });
-        if (mappedCounselors.length > 0) setCounselorCards(mappedCounselors);
 
         const mappedAmbassadors = (ambassadorsDirectory ?? []).slice(0, 8).map((user, idx) => {
           const name = String(user.displayName ?? user.email ?? `Ambassador ${idx + 1}`);
@@ -742,10 +711,9 @@ const NewStudentFrontend: React.FC = () => {
         </button>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-3 gap-4">
         {[
           { id: 'peer' as TabId, label: 'Talk to Senior', icon: GraduationCap, color: 'bg-[#7c4dff]' },
-          { id: 'counselors' as TabId, label: 'Talk to Counsellor', icon: Users, color: 'bg-[#9c27b0]' },
           { id: 'community' as TabId, label: 'Ask Community', icon: MessageSquare, color: 'bg-[#e91e63]' },
           { id: 'home' as TabId, label: 'Find Events', icon: Calendar, color: 'bg-[#ff9800]' },
         ].map((item) => (
@@ -758,42 +726,6 @@ const NewStudentFrontend: React.FC = () => {
         ))}
       </div>
 
-      <section className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-bold text-gray-900">Upcoming Counselor Sessions</h3>
-          <button className="text-sm font-bold text-[#7c4dff]">View all</button>
-        </div>
-        <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar md:grid md:grid-cols-2 md:overflow-visible">
-          {upcomingSessions.map((session) => (
-            <div
-              key={session.meetingId || session.name}
-              className="w-[300px] md:w-auto flex-shrink-0 rounded-3xl border border-gray-100 bg-white p-6 shadow-sm space-y-3 transition-all hover:shadow-md"
-            >
-              <h4 className="font-bold text-gray-900">{session.name}</h4>
-              <p className="text-xs text-gray-500">{session.uni}</p>
-              <div className="space-y-1 text-xs text-[#7c4dff]">
-                <p className="flex items-center gap-2"><Calendar size={12} /> {session.time}</p>
-                <p className="flex items-center gap-2"><Clock size={12} /> {session.mode}</p>
-                <p className="flex items-center gap-2"><Video size={12} /> Video Call</p>
-              </div>
-              <button
-                type="button"
-                disabled={!session.meetingId}
-                onClick={() => {
-                  if (!session.meetingId) {
-                    alert('This booked session is missing a chat link.');
-                    return;
-                  }
-                  navigate(`/student/meetings/${session.meetingId}/chat`);
-                }}
-                className="w-full rounded-2xl bg-[#7c4dff] text-white py-2.5 text-sm font-bold hover:bg-[#651fff] disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                Open chat
-              </button>
-            </div>
-          ))}
-        </div>
-      </section>
 
       <section className="space-y-4">
         <div className="flex items-center justify-between">
@@ -1596,7 +1528,6 @@ const NewStudentFrontend: React.FC = () => {
 
   const renderActiveView = () => {
     if (activeTab === 'peer') return selectedPeerAmbassador ? renderPeerAmbassadorProfilePage() : renderPeer();
-    if (activeTab === 'counselors') return selectedCounselor ? renderCounselorProfilePage() : renderCounselors();
     if (activeTab === 'community') return renderCommunity();
     if (activeTab === 'profile') return renderProfile();
     return renderHome();

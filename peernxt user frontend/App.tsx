@@ -4,7 +4,7 @@ import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { User, UserRole } from './types';
 import { isSupabaseConfigured, supabase } from './lib/supabase';
-import { bootstrapProfileForSession, parseApiError } from './lib/api';
+import { bootstrapProfileForSession, parseApiError, setTokenOverride } from './lib/api';
 import { parseStoredRole, persistSelectedRole } from './lib/selectedRole';
 
 // Components
@@ -50,6 +50,8 @@ export const useAuth = () => {
 const queryClient = new QueryClient();
 const AUTH_BYPASS_ENABLED = import.meta.env.VITE_SKIP_AUTH === 'true';
 const AUTH_REDIRECT_ORIGIN = import.meta.env.VITE_AUTH_REDIRECT_ORIGIN || window.location.origin;
+// Captured at JS parse time — before Supabase cleans ?code= from URL after PKCE exchange.
+const HAD_PKCE_CODE = new URLSearchParams(window.location.search).has('code');
 const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
@@ -86,111 +88,74 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
   });
 
   useEffect(() => {
-    const initAuth = async () => {
-      if (AUTH_BYPASS_ENABLED) {
-        const role = parseStoredRole(localStorage.getItem('selectedRole'));
-        setToken('dev-bypass-token');
-        setUser({
-          id: 'dev-user',
-          email: 'dev@local.test',
-          name: 'Dev User',
-          role,
-          onboardingCompleted: true,
-          googleCalendarConnected: false,
-        });
-        setAuthError(null);
-        setIsLoading(false);
-        return;
-      }
-      try {
-        const searchParams = new URLSearchParams(window.location.search);
-        const code = searchParams.get('code');
-        if (code) {
-        }
-        const { data } = await supabase.auth.getSession();
-        if (!data.session) {
-          setToken(null);
-          setUser(null);
-          setIsLoading(false);
-          return;
-        }
-        setToken(data.session.access_token);
-        const savedRole = parseStoredRole(localStorage.getItem('selectedRole'));
-        try {
-          const profile = await bootstrapProfileForSession(savedRole);
-          setUser(profile);
-          const hash = window.location.hash || '';
-          if (!hash || hash === '#/' || hash.startsWith('#/login/')) {
-            redirectToDashboardForRole(profile.role);
-          }
-        } catch (profileError) {
-          // Fallback to auth user so the session can continue even if backend profile sync is slow.
-          const { data: userData } = await supabase.auth.getUser();
-          if (userData.user) {
-            const fallbackUser = createFallbackUserFromAuth(userData.user, savedRole);
-            setUser(fallbackUser);
-            setAuthError(parseApiError(profileError));
-            const hash = window.location.hash || '';
-            if (!hash || hash === '#/' || hash.startsWith('#/login/')) {
-              if (fallbackUser.role === UserRole.STUDENT) window.location.hash = '/student/onboarding';
-              else redirectToDashboardForRole(fallbackUser.role);
-            }
-          } else {
-            throw profileError;
-          }
-        }
-      } catch (error) {
-        setAuthError(parseApiError(error));
-        setToken(null);
-        setUser(null);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    initAuth();
+    if (AUTH_BYPASS_ENABLED) {
+      const role = parseStoredRole(localStorage.getItem('selectedRole'));
+      setToken('dev-bypass-token');
+      setUser({ id: 'dev-user', email: 'dev@local.test', name: 'Dev User', role, onboardingCompleted: true, googleCalendarConnected: false });
+      setAuthError(null);
+      setIsLoading(false);
+      return;
+    }
 
-    const { data: subscription } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (AUTH_BYPASS_ENABLED) return;
+    const handleSession = async (session: { access_token: string; user: { id: string; email?: string; user_metadata?: Record<string, unknown> } } | null, fromPKCE = false) => {
       if (!session) {
+        // If PKCE code was in URL, keep spinner up — SIGNED_IN will fire when exchange completes.
+        if (HAD_PKCE_CODE && !fromPKCE) return;
         setToken(null);
         setUser(null);
+        setIsLoading(false);
         return;
       }
-      // `getSession()` in initAuth already hydrates the first session; avoid duplicate bootstraps.
-      if (event === 'INITIAL_SESSION') return;
-      if (event === 'TOKEN_REFRESHED') {
-        setToken(session.access_token);
+      if (userRef.current?.id === session.user.id) {
+        setIsLoading(false);
         return;
       }
       setToken(session.access_token);
-      const uid = session.user.id;
-      if (userRef.current?.id === uid) {
-        return;
-      }
+      setTokenOverride(session.access_token);
       const savedRole = parseStoredRole(localStorage.getItem('selectedRole'));
       try {
-        const profile = await bootstrapProfileForSession(savedRole);
+        const profile = await bootstrapProfileForSession(savedRole, session.user);
         setUser(profile);
         setAuthError(null);
         const hash = window.location.hash || '';
         if (!hash || hash === '#/' || hash.startsWith('#/login/')) {
           redirectToDashboardForRole(profile.role);
         }
-      } catch (error) {
-        const { data: userData } = await supabase.auth.getUser();
-        if (userData.user) {
-          const fallbackUser = createFallbackUserFromAuth(userData.user, savedRole);
+      } catch (profileError) {
+        if (session.user) {
+          const fallbackUser = createFallbackUserFromAuth(session.user, savedRole);
           setUser(fallbackUser);
-          setAuthError(parseApiError(error));
+          setAuthError(parseApiError(profileError));
           const hash = window.location.hash || '';
           if (!hash || hash === '#/' || hash.startsWith('#/login/')) {
             if (fallbackUser.role === UserRole.STUDENT) window.location.hash = '/student/onboarding';
             else redirectToDashboardForRole(fallbackUser.role);
           }
         } else {
-          setAuthError(parseApiError(error));
+          setToken(null);
+          setUser(null);
+          setAuthError(parseApiError(profileError));
         }
+      } finally {
+        setTokenOverride(null);
+        setIsLoading(false);
       }
+    };
+
+    const { data: subscription } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'TOKEN_REFRESHED') {
+        if (session) setToken(session.access_token);
+        return;
+      }
+      if (event === 'SIGNED_OUT') {
+        setToken(null);
+        setUser(null);
+        setIsLoading(false);
+        return;
+      }
+      // INITIAL_SESSION: fires on load with cached session or null.
+      // SIGNED_IN: fires after PKCE code exchange completes, or email/password login.
+      await handleSession(session, event === 'SIGNED_IN');
     });
 
     return () => {

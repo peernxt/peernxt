@@ -29,26 +29,15 @@ const LandingPage: React.FC = () => {
               Connect with certified counselors, meet peer ambassadors already at your dream university, and join a global community of students.
             </p>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
               <Link to="/login/student" className="group p-8 bg-white rounded-2xl shadow-sm border border-slate-100 hover:border-indigo-300 hover:shadow-md transition-all text-left">
                 <div className="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center mb-4 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
                   <GraduationCap size={28} />
                 </div>
                 <h3 className="text-xl font-bold mb-2">For Students</h3>
-                <p className="text-slate-500 mb-4">Book free counseling, join communities, and find peer mentors.</p>
+                <p className="text-slate-500 mb-4">Join communities, find peer mentors, and navigate your study abroad journey.</p>
                 <span className="flex items-center gap-2 text-indigo-600 font-semibold">
                   Get Started <ArrowRight size={16} />
-                </span>
-              </Link>
-
-              <Link to="/login/counselor" className="group p-8 bg-white rounded-2xl shadow-sm border border-slate-100 hover:border-emerald-300 hover:shadow-md transition-all text-left">
-                <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center mb-4 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
-                  <UserCheck size={28} />
-                </div>
-                <h3 className="text-xl font-bold mb-2">For Counselors</h3>
-                <p className="text-slate-500 mb-4">Manage leads, schedule student meetings, and grow your reach.</p>
-                <span className="flex items-center gap-2 text-emerald-600 font-semibold">
-                  Professional Login <ArrowRight size={16} />
                 </span>
               </Link>
 
@@ -120,7 +109,6 @@ const LandingPage: React.FC = () => {
               <h5 className="text-white font-bold mb-4">Quick Links</h5>
               <ul className="space-y-2">
                 <li><Link to="/login/student" className="hover:text-white">Student Login</Link></li>
-                <li><Link to="/login/counselor" className="hover:text-white">Counselor Login</Link></li>
                 <li><Link to="/login/ambassador" className="hover:text-white">Ambassador Login</Link></li>
               </ul>
             </div>
