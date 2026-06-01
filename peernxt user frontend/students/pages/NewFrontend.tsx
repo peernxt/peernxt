@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+﻿import React, { useEffect, useMemo, useState } from 'react';
 import {
   Bell,
   Calendar,
@@ -329,6 +329,8 @@ const NewStudentFrontend: React.FC = () => {
   };
 
   const bookCounselorByAgentId = async (agentId: string | undefined, busyKey: string, slotAtIso?: string) => {
+    alert('Counsellor booking is coming soon. Peer ambassador sessions are live now.');
+    return;
     if (!agentId) {
       alert('This profile is not linked to a live counselor account yet. Open Counselors after data loads.');
       return;
@@ -404,7 +406,7 @@ const NewStudentFrontend: React.FC = () => {
       name: 'Rahul Khanna',
       title: 'Senior Student Ambassador',
       headline: 'Visa, housing, and first-semester transition mentor',
-      universityProgram: "University of Melbourne • Master's in Data Science",
+      universityProgram: "University of Melbourne â€¢ Master's in Data Science",
       specialties: ['Visa', 'Housing', 'Part-time Jobs', 'SOP Review'],
       rating: 4.9,
       studentsGuided: '300+',
@@ -423,7 +425,7 @@ const NewStudentFrontend: React.FC = () => {
       name: 'Aisha Thomas',
       title: 'Peer Ambassador',
       headline: 'Application shortlisting and scholarship strategy guide',
-      universityProgram: "University of Toronto • Master's in Computer Science",
+      universityProgram: "University of Toronto â€¢ Master's in Computer Science",
       specialties: ['University Shortlisting', 'Scholarships', 'Student Life', 'Networking'],
       rating: 4.8,
       studentsGuided: '220+',
@@ -442,7 +444,7 @@ const NewStudentFrontend: React.FC = () => {
       name: 'Nikhil Rao',
       title: 'Peer Ambassador',
       headline: 'Career-focused advisor for UK admissions and internships',
-      universityProgram: "University of Manchester • MBA",
+      universityProgram: "University of Manchester â€¢ MBA",
       specialties: ['UK Admissions', 'Internships', 'CV Review', 'Career Planning'],
       rating: 4.8,
       studentsGuided: '260+',
@@ -469,7 +471,7 @@ const NewStudentFrontend: React.FC = () => {
   const counselors: CounselorCard[] = [
     {
       name: 'Dr. Sarah Wilson',
-      title: 'Senior Counsellor • AECC Bangalore',
+      title: 'Senior Counsellor â€¢ AECC Bangalore',
       specialties: ['USA', 'UK', 'Canada', 'Australia'],
       headline: 'Senior Admission & Visa Consultant',
       rating: 4.9,
@@ -492,7 +494,7 @@ const NewStudentFrontend: React.FC = () => {
     },
     {
       name: 'James Peterson',
-      title: 'Senior Counsellor • AECC Bangalore',
+      title: 'Senior Counsellor â€¢ AECC Bangalore',
       specialties: ['USA', 'UK', 'Canada', 'Australia'],
       headline: 'Overseas Education & Profile Strategy Expert',
       rating: 4.8,
@@ -521,33 +523,13 @@ const NewStudentFrontend: React.FC = () => {
       setIsLoadingData(true);
       setDataError(null);
       try {
-        const [myMeetings, eventList, counselorsDirectory, ambassadorsDirectory] = await Promise.all([
-          apiRequest<any[]>('/counselor-meetings/me'),
+        // counselor-meetings excluded until counsellor flow is built (Phase 2 roadmap)
+        const [eventList, counselorsDirectory, ambassadorsDirectory] = await Promise.all([
           apiRequest<any[]>('/events?limit=6'),
           apiRequest<DirectoryUser[]>('/users?role=agent'),
           apiRequest<DirectoryUser[]>('/users?role=ambassador'),
         ]);
         if (!isMounted) return;
-
-        const myUid = user?.id ? String(user.id) : '';
-        const studentMeetings = (myMeetings ?? []).filter((m) => !myUid || String(m.studentId) === myUid);
-        const agentNameById = new Map(
-          (counselorsDirectory ?? []).map((u) => [String(u.id), String(u.displayName ?? u.email ?? 'Counselor')])
-        );
-        const sessions: HomeSession[] = studentMeetings.slice(0, 4).map((meeting, idx) => {
-          const agentId = String(meeting.agentId ?? '');
-          const slotAt = String(meeting.slotAt ?? '');
-          const agentName = agentNameById.get(agentId) ?? `Counselor session ${idx + 1}`;
-          return {
-            meetingId: String(meeting.id ?? ''),
-            agentId,
-            name: agentName,
-            uni: 'Counselor meeting',
-            time: new Date(slotAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }),
-            mode: `${new Date(slotAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} · ${String(meeting.callType ?? 'video').toUpperCase()}`,
-          };
-        });
-        if (sessions.length > 0) setUpcomingSessions(sessions);
 
         const colorPool = ['bg-orange-500', 'bg-blue-500', 'bg-purple-500', 'bg-emerald-500'];
         const mappedEvents = (eventList ?? []).slice(0, 4).map((event, idx) => {
@@ -574,7 +556,7 @@ const NewStudentFrontend: React.FC = () => {
           return {
             backendUserId: String(user.id),
             name,
-            title: `Senior Counsellor • ${agency}`,
+            title: `Senior Counsellor â€¢ ${agency}`,
             specialties,
             headline: 'Admission and visa guidance specialist',
             rating: 4.8,
@@ -605,7 +587,7 @@ const NewStudentFrontend: React.FC = () => {
             name,
             title: 'Peer Ambassador',
             headline: 'Student mentor for admissions and campus transition',
-            universityProgram: `${university} • ${course}`,
+            universityProgram: `${university} â€¢ ${course}`,
             specialties: ['Visa', 'Housing', 'Student Life', country],
             rating: 4.8,
             studentsGuided: `${180 + idx * 25}+`,
@@ -802,9 +784,6 @@ const NewStudentFrontend: React.FC = () => {
                     alert('This booked session is missing a chat link.');
                     return;
                   }
-                  // #region agent log
-                  fetch('http://127.0.0.1:7754/ingest/e019f77b-9cc8-4792-b508-1b9b9f842355',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'b7fb4d'},body:JSON.stringify({sessionId:'b7fb4d',runId:'pre-fix-1',hypothesisId:'H1',location:'NewFrontend.tsx:homeSessionOpenChat',message:'student navigating to meeting chat',data:{meetingId:session.meetingId ?? null,agentId:session.agentId ?? null,sessionName:session.name},timestamp:Date.now()})}).catch(()=>{});
-                  // #endregion
                   navigate(`/student/meetings/${session.meetingId}/chat`);
                 }}
                 className="w-full rounded-2xl bg-[#7c4dff] text-white py-2.5 text-sm font-bold hover:bg-[#651fff] disabled:cursor-not-allowed disabled:opacity-50"
@@ -1071,14 +1050,14 @@ const NewStudentFrontend: React.FC = () => {
           <section className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm space-y-2">
             <h4 className="text-sm font-bold uppercase tracking-wider text-gray-500">Education</h4>
             {selectedPeerAmbassador.education.map((item) => (
-              <p key={item} className="text-sm text-gray-700">• {item}</p>
+              <p key={item} className="text-sm text-gray-700">â€¢ {item}</p>
             ))}
           </section>
 
           <section className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm space-y-2">
             <h4 className="text-sm font-bold uppercase tracking-wider text-gray-500">Certifications</h4>
             {selectedPeerAmbassador.certifications.map((item) => (
-              <p key={item} className="text-sm text-gray-700">• {item}</p>
+              <p key={item} className="text-sm text-gray-700">â€¢ {item}</p>
             ))}
           </section>
         </div>
@@ -1239,14 +1218,14 @@ const NewStudentFrontend: React.FC = () => {
           <section className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm space-y-2">
             <h4 className="text-sm font-bold uppercase tracking-wider text-gray-500">Education</h4>
             {selectedCounselor.education.map((item) => (
-              <p key={item} className="text-sm text-gray-700">• {item}</p>
+              <p key={item} className="text-sm text-gray-700">â€¢ {item}</p>
             ))}
           </section>
 
           <section className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm space-y-2">
             <h4 className="text-sm font-bold uppercase tracking-wider text-gray-500">Certifications</h4>
             {selectedCounselor.certifications.map((item) => (
-              <p key={item} className="text-sm text-gray-700">• {item}</p>
+              <p key={item} className="text-sm text-gray-700">â€¢ {item}</p>
             ))}
           </section>
         </div>
@@ -1328,7 +1307,7 @@ const NewStudentFrontend: React.FC = () => {
                 >
                   <p className="text-base font-bold text-gray-900">{country}</p>
                   <p className="mt-1 text-xs text-gray-500">
-                    {groupsCount} groups • {membersCount.toLocaleString()} members
+                    {groupsCount} groups â€¢ {membersCount.toLocaleString()} members
                   </p>
                   <p className="mt-3 text-xs font-semibold text-[#7c4dff]">Open Country Network</p>
                 </button>
