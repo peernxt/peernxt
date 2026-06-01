@@ -1,5 +1,25 @@
 {
   "name": "peernxt-workspace",
   "private": true,
-  "version": "1.0.0"
+  "version": "1.0.0",
+  "workspaces": [
+    "peernxt backend",
+    "peernxt user frontend",
+    "peernxt admin frontend"
+  ],
+  "scripts": {
+    "dev": "npm run dev:backend & npm run dev:user & npm run dev:admin",
+    "dev:backend": "npm --workspace=\"peernxt backend\" run dev",
+    "dev:user": "npm --workspace=\"peernxt user frontend\" run dev",
+    "dev:admin": "npm --workspace=\"peernxt admin frontend\" run dev",
+    "build": "npm run build:backend && npm run build:user && npm run build:admin",
+    "build:backend": "npm --workspace=\"peernxt backend\" run build",
+    "build:user": "npm --workspace=\"peernxt user frontend\" run build",
+    "build:admin": "npm --workspace=\"peernxt admin frontend\" run build",
+    "install:all": "npm install --workspaces",
+    "lint": "npm --workspace=\"peernxt backend\" run lint"
+  },
+  "engines": {
+    "node": ">=18"
+  }
 }

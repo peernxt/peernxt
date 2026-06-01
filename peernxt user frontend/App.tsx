@@ -1,4 +1,4 @@
-
+﻿
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -87,9 +87,6 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 
   useEffect(() => {
     const initAuth = async () => {
-      // #region agent log
-      fetch('http://127.0.0.1:7754/ingest/e019f77b-9cc8-4792-b508-1b9b9f842355',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'cce85b'},body:JSON.stringify({sessionId:'cce85b',runId:'oauth-run-1',hypothesisId:'H2',location:'App.tsx:initAuth:start',message:'initAuth started',data:{search:window.location.search,hash:window.location.hash},timestamp:Date.now()})}).catch(()=>{});
-      // #endregion
       if (AUTH_BYPASS_ENABLED) {
         const role = parseStoredRole(localStorage.getItem('selectedRole'));
         setToken('dev-bypass-token');
@@ -109,14 +106,8 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
         const searchParams = new URLSearchParams(window.location.search);
         const code = searchParams.get('code');
         if (code) {
-          // #region agent log
-          fetch('http://127.0.0.1:7754/ingest/e019f77b-9cc8-4792-b508-1b9b9f842355',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'cce85b'},body:JSON.stringify({sessionId:'cce85b',runId:'oauth-run-2',hypothesisId:'H5',location:'App.tsx:initAuth:exchange:start',message:'code detected, letting supabase auto-exchange from URL',data:{hasCode:true},timestamp:Date.now()})}).catch(()=>{});
-          // #endregion
         }
         const { data } = await supabase.auth.getSession();
-        // #region agent log
-        fetch('http://127.0.0.1:7754/ingest/e019f77b-9cc8-4792-b508-1b9b9f842355',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'cce85b'},body:JSON.stringify({sessionId:'cce85b',runId:'oauth-run-1',hypothesisId:'H2',location:'App.tsx:initAuth:getSession',message:'getSession resolved',data:{hasSession:Boolean(data.session),search:window.location.search},timestamp:Date.now()})}).catch(()=>{});
-        // #endregion
         if (!data.session) {
           setToken(null);
           setUser(null);
@@ -128,9 +119,6 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
         try {
           const profile = await bootstrapProfileForSession(savedRole);
           setUser(profile);
-          // #region agent log
-          fetch('http://127.0.0.1:7754/ingest/e019f77b-9cc8-4792-b508-1b9b9f842355',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'cce85b'},body:JSON.stringify({sessionId:'cce85b',hypothesisId:'H1',location:'App.tsx:initAuth',message:'profile bootstrapped',data:{role:String(profile.role),onboardingCompleted:profile.onboardingCompleted},timestamp:Date.now()})}).catch(()=>{});
-          // #endregion
           const hash = window.location.hash || '';
           if (!hash || hash === '#/' || hash.startsWith('#/login/')) {
             redirectToDashboardForRole(profile.role);
@@ -142,9 +130,6 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
             const fallbackUser = createFallbackUserFromAuth(userData.user, savedRole);
             setUser(fallbackUser);
             setAuthError(parseApiError(profileError));
-            // #region agent log
-            fetch('http://127.0.0.1:7754/ingest/e019f77b-9cc8-4792-b508-1b9b9f842355',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'cce85b'},body:JSON.stringify({sessionId:'cce85b',hypothesisId:'H1',location:'App.tsx:initAuth:fallback',message:'fallback user after profile error',data:{fallbackRole:String(fallbackUser.role),storedRaw:localStorage.getItem('selectedRole')},timestamp:Date.now()})}).catch(()=>{});
-            // #endregion
             const hash = window.location.hash || '';
             if (!hash || hash === '#/' || hash.startsWith('#/login/')) {
               if (fallbackUser.role === UserRole.STUDENT) window.location.hash = '/student/onboarding';
@@ -180,9 +165,6 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
       setToken(session.access_token);
       const uid = session.user.id;
       if (userRef.current?.id === uid) {
-        // #region agent log
-        fetch('http://127.0.0.1:7754/ingest/e019f77b-9cc8-4792-b508-1b9b9f842355',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'cce85b'},body:JSON.stringify({sessionId:'cce85b',hypothesisId:'H3',location:'App.tsx:onAuthStateChange',message:'skip hydrate same user',data:{event},timestamp:Date.now()})}).catch(()=>{});
-        // #endregion
         return;
       }
       const savedRole = parseStoredRole(localStorage.getItem('selectedRole'));
@@ -231,9 +213,6 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     }
     persistSelectedRole(role);
     const redirectTo = `${AUTH_REDIRECT_ORIGIN}/`;
-    // #region agent log
-    fetch('http://127.0.0.1:7754/ingest/e019f77b-9cc8-4792-b508-1b9b9f842355',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'cce85b'},body:JSON.stringify({sessionId:'cce85b',runId:'oauth-run-1',hypothesisId:'H4',location:'App.tsx:loginWithGoogle',message:'starting oauth request',data:{redirectTo},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
@@ -243,9 +222,6 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     });
     if (error) throw error;
     if (!data?.url) throw new Error('Could not start Google sign-in. Check Supabase Google provider settings.');
-    // #region agent log
-    fetch('http://127.0.0.1:7754/ingest/e019f77b-9cc8-4792-b508-1b9b9f842355',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'cce85b'},body:JSON.stringify({sessionId:'cce85b',runId:'oauth-run-1',hypothesisId:'H4',location:'App.tsx:loginWithGoogle:url',message:'oauth url generated',data:{hasUrl:Boolean(data.url)},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
     return data.url;
   };
 
@@ -375,9 +351,6 @@ const RootRoute: React.FC = () => {
   }
 
   if (hasOAuthCallbackParams) {
-    // #region agent log
-    fetch('http://127.0.0.1:7754/ingest/e019f77b-9cc8-4792-b508-1b9b9f842355',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'cce85b'},body:JSON.stringify({sessionId:'cce85b',runId:'oauth-run-1',hypothesisId:'H2',location:'App.tsx:RootRoute:oauthParams',message:'oauth callback params without session user',data:{search:window.location.search,hasToken:Boolean(token),hasUser:Boolean(user)},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
     if (isLoading) {
       return (
         <div className="flex h-screen items-center justify-center bg-slate-50">
@@ -397,9 +370,6 @@ const RootRoute: React.FC = () => {
 
   const nextRole = searchParams.get('nextRole');
   if (nextRole === 'student' || nextRole === 'counselor' || nextRole === 'ambassador') {
-    // #region agent log
-    fetch('http://127.0.0.1:7754/ingest/e019f77b-9cc8-4792-b508-1b9b9f842355',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'cce85b'},body:JSON.stringify({sessionId:'cce85b',runId:'oauth-run-1',hypothesisId:'H2',location:'App.tsx:RootRoute:nextRole',message:'redirecting by nextRole branch',data:{nextRole,search:window.location.search,hasToken:Boolean(token),hasUser:Boolean(user)},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
     localStorage.setItem('selectedRole', nextRole);
     return <Navigate to={`/login/${nextRole}`} replace />;
   }
