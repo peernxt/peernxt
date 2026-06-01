@@ -24,6 +24,9 @@ export const tables = {
   eventRSVPs: 'event_rsvps',
 } as const;
 
+/** IST timezone for display formatting */
+export const IST = 'Asia/Kolkata';
+
 /** Map snake_case row from Supabase to camelCase for our types */
 export function rowToCamel<T extends Record<string, unknown>>(row: T): Record<string, unknown> {
   const out: Record<string, unknown> = {};

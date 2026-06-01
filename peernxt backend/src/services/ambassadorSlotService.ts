@@ -1,4 +1,4 @@
-import { supabase, tables, rowToCamel } from '../lib/db.js';
+import { supabase, tables, rowToCamel, IST } from '../lib/db.js';
 import type { AmbassadorSlot, AmbassadorBooking } from '../types/index.js';
 import { createGoogleMeetLink } from './googleMeetService.js';
 import { sendMeetingLink } from './notificationService.js';
@@ -110,7 +110,7 @@ export async function bookAmbassadorSlot(
   const dateTime = new Date(slot.slotAt).toLocaleString('en-IN', {
     dateStyle: 'medium',
     timeStyle: 'short',
-    timeZone: 'Asia/Kolkata',
+    timeZone: IST,
   });
 
   const student = await getUserById(input.studentId);
@@ -176,12 +176,11 @@ export async function getOpenAmbassadorSlots(
     .eq('status', 'open')
     .order('slot_at', { ascending: true });
   if (ambassadorId) q = q.eq('ambassador_id', ambassadorId);
+  if (from) q = q.gte('slot_at', from);
+  if (to) q = q.lte('slot_at', to);
   const { data, error } = await q;
   if (error) throw error;
-  let slots = (data ?? []).map((r) => rowToCamel(r) as unknown as AmbassadorSlot);
-  if (from) slots = slots.filter((s) => s.slotAt >= from);
-  if (to) slots = slots.filter((s) => s.slotAt <= to);
-  return slots;
+  return (data ?? []).map((r) => rowToCamel(r) as unknown as AmbassadorSlot);
 }
 
 export async function getBookingsForSlot(slotId: string): Promise<AmbassadorBooking[]> {

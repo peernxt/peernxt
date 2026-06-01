@@ -3,11 +3,12 @@ import { z } from 'zod';
 export const userRoleSchema = z.enum(['student', 'agent', 'ambassador', 'admin']);
 
 export const studentProfileSchema = z.object({
-  whatsappNumber: z.string().min(10),
+  whatsappNumber: z.string().optional().default(''),
   whatsappVerified: z.boolean().optional().default(false),
-  intake: z.string().min(1),
-  preferredCountries: z.array(z.string()),
-  bio: z.string(),
+  intake: z.string().optional().default(''),
+  preferredCountries: z.array(z.string()).optional().default([]),
+  bio: z.string().optional().default(''),
+  location: z.string().optional().default(''),
 });
 
 export const agentProfileSchema = z.object({

@@ -1,5 +1,5 @@
 /**
- * PeerNXT domain types and Firestore document shapes.
+ * PeerNXT domain types (PostgreSQL via Supabase).
  */
 
 export type UserRole = 'student' | 'agent' | 'ambassador' | 'admin';
@@ -16,11 +16,12 @@ export interface BaseUser {
 }
 
 export interface StudentProfile {
-  whatsappNumber: string;
-  whatsappVerified: boolean;
-  intake: string; // e.g. "Fall 2026", "Spring 2027"
-  preferredCountries: string[];
-  bio: string;
+  whatsappNumber?: string;
+  whatsappVerified?: boolean;
+  intake?: string; // e.g. "Fall 2026", "Spring 2027"
+  preferredCountries?: string[];
+  bio?: string;
+  location?: string; // e.g. "Maharashtra, Mumbai"
 }
 
 export interface AgentProfile {

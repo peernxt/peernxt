@@ -72,14 +72,17 @@ router.put(
       return res.status(400).json({ error: 'Validation failed', details: parsed.error.flatten() });
     }
     const uid = req.user!.uid;
-    if (!(await userExists(uid))) {
+    const existing = await getUserById(uid);
+    if (!existing) {
       return res.status(404).json({ error: 'User profile not found. Use POST /users/me to register.' });
     }
     const updates: Record<string, unknown> = {
       updated_at: new Date().toISOString(),
       ...(parsed.data.displayName !== undefined && { display_name: parsed.data.displayName }),
       ...(parsed.data.photoURL !== undefined && { photo_url: parsed.data.photoURL }),
-      ...(parsed.data.profile !== undefined && { profile: parsed.data.profile }),
+      ...(parsed.data.profile !== undefined && {
+        profile: { ...(existing.profile as Record<string, unknown>), ...parsed.data.profile },
+      }),
     };
     await supabase.from(tables.users).update(updates).eq('id', uid);
     const updated = await getUserById(uid);

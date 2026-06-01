@@ -12,8 +12,12 @@ export async function getUserById(uid: string): Promise<User | null> {
 }
 
 export async function getUserRole(uid: string): Promise<UserRole | null> {
-  const user = await getUserById(uid);
-  return user?.role ?? null;
+  const { data } = await supabase
+    .from(tables.users)
+    .select('role')
+    .eq('id', uid)
+    .single();
+  return (data?.role as UserRole) ?? null;
 }
 
 export async function setUserRole(uid: string, role: UserRole): Promise<void> {

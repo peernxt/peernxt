@@ -63,12 +63,12 @@ const defaultProfileByRole = (role: UserRole) => {
     };
   }
   return {
-    // Must satisfy backend createUserSchema on first profile bootstrap.
-    whatsappNumber: '0000000000',
+    whatsappNumber: '',
     whatsappVerified: false,
-    intake: 'Fall 2025',
+    intake: '',
     preferredCountries: [],
     bio: '',
+    location: '',
   };
 };
 
@@ -76,16 +76,9 @@ export const toAppUser = (apiUser: any) => {
   const mappedRole = appRoleFromBackendRole(String(apiUser.role ?? 'student'));
   const profile = apiUser.profile ?? {};
   const hasStudentOnboarding =
-    String(profile.whatsappNumber ?? '').trim().length > 0 &&
     Array.isArray(profile.preferredCountries) &&
     profile.preferredCountries.length > 0 &&
-    String(profile.intake ?? '').trim().length > 0 &&
-    (
-      (profile.currentLocation && typeof profile.currentLocation === 'object') ||
-      (String(profile.state ?? '').trim().length > 0 &&
-        String(profile.city ?? '').trim().length > 0 &&
-        String(profile.taluk ?? '').trim().length > 0)
-    );
+    String(profile.location ?? '').trim().length > 0;
 
   return {
     id: String(apiUser.id),

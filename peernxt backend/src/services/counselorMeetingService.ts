@@ -1,4 +1,4 @@
-import { supabase, tables, rowToCamel } from '../lib/db.js';
+import { supabase, tables, rowToCamel, IST } from '../lib/db.js';
 import type { CounselorMeeting } from '../types/index.js';
 import { createGoogleMeetLink } from './googleMeetService.js';
 import { createChat, addMessage } from './chatService.js';
@@ -57,7 +57,7 @@ export async function bookCounselorMeeting(
   await addMessage(
     chat.id,
     'system',
-    `${callLabel} link for ${new Date(input.slotAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}: ${meetLink}`,
+    `${callLabel} link for ${new Date(input.slotAt).toLocaleString('en-IN', { timeZone: IST })}: ${meetLink}`,
     'system',
     meetLink
   );
