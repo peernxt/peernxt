@@ -82,7 +82,7 @@ export const toAppUser = (apiUser: any) => {
   const hasStudentOnboarding =
     Array.isArray(profile.preferredCountries) &&
     profile.preferredCountries.length > 0 &&
-    String(profile.location ?? '').trim().length > 0;
+    String(profile.whatsappNumber ?? '').trim().length >= 10;
 
   return {
     id: String(apiUser.id),

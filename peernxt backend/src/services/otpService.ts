@@ -56,7 +56,7 @@ export async function verifyOTP(phone: string, inputOtp: string): Promise<boolea
     throw err;
   }
 
-  if (stored !== inputOtp) {
+  if (String(stored) !== String(inputOtp)) {
     const newAttempts = await redis.incr(attemptsKey(phone));
     if (newAttempts >= MAX_ATTEMPTS) {
       await redis.expire(attemptsKey(phone), LOCKOUT_SECONDS);
