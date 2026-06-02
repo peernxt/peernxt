@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import { env } from './config/env.js';
 import { errorHandler } from './middleware/errorHandler.js';
+import authRouter from './routes/auth.js';
 import usersRouter from './routes/users.js';
 import counselorMeetingsRouter from './routes/counselorMeetings.js';
 import ambassadorSlotsRouter from './routes/ambassadorSlots.js';
@@ -35,6 +36,7 @@ const limiter = rateLimit({
 app.use(limiter);
 
 const prefix = env.apiPrefix ?? '/api/v1';
+app.use(`${prefix}/auth`, authRouter);
 app.use(`${prefix}/users`, usersRouter);
 app.use(`${prefix}/counselor-meetings`, counselorMeetingsRouter);
 app.use(`${prefix}/ambassador-slots`, ambassadorSlotsRouter);

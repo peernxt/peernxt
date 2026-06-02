@@ -38,6 +38,11 @@ export const env = {
     apiKey: getOptional('WHATSAPP_API_KEY'),
   },
 
+  redis: {
+    url: getOptional('UPSTASH_REDIS_REST_URL'),
+    token: getOptional('UPSTASH_REDIS_REST_TOKEN'),
+  },
+
   email: {
     provider: getOptional('EMAIL_PROVIDER', 'resend'),
     resendApiKey: getOptional('RESEND_API_KEY'),
