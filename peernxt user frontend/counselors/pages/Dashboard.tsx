@@ -1,4 +1,4 @@
-
+﻿
 import React, { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../../App';
 import {
@@ -106,9 +106,6 @@ const CounselorDashboard: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => {
-                      // #region agent log
-                      fetch('http://127.0.0.1:7754/ingest/e019f77b-9cc8-4792-b508-1b9b9f842355',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'b7fb4d'},body:JSON.stringify({sessionId:'b7fb4d',runId:'pre-fix-1',hypothesisId:'H1',location:'CounselorDashboard.tsx:openChat',message:'counselor navigating to meeting chat from dashboard',data:{meetingId:String(meeting.id ?? ''),status:String(meeting.status ?? ''),hasMeetLink:Boolean(meeting.meetLink)},timestamp:Date.now()})}).catch(()=>{});
-                      // #endregion
                       navigate(`/counselor/meetings/${meeting.id}/chat`);
                     }}
                     className="flex-grow sm:flex-grow-0 flex items-center justify-center gap-2 px-4 py-2.5 border border-slate-200 text-slate-700 rounded-xl font-bold text-sm hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600 transition-all"

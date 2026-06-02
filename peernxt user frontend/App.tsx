@@ -48,7 +48,7 @@ export const useAuth = () => {
 };
 
 const queryClient = new QueryClient();
-const AUTH_BYPASS_ENABLED = import.meta.env.VITE_SKIP_AUTH === 'true';
+const AUTH_BYPASS_ENABLED = import.meta.env.VITE_SKIP_AUTH === 'true' && import.meta.env.DEV;
 const AUTH_REDIRECT_ORIGIN = import.meta.env.VITE_AUTH_REDIRECT_ORIGIN || window.location.origin;
 // Captured at JS parse time — before Supabase cleans ?code= from URL after PKCE exchange.
 const HAD_PKCE_CODE = new URLSearchParams(window.location.search).has('code');

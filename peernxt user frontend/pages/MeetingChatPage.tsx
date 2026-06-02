@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+﻿import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Calendar, Clock, ExternalLink, MessageSquare, Send } from 'lucide-react';
 import { useAuth } from '../App';
@@ -63,23 +63,14 @@ const MeetingChatPage: React.FC = () => {
 
   const loadChat = useCallback(async () => {
     if (!meetingId) {
-      // #region agent log
-      fetch('http://127.0.0.1:7754/ingest/e019f77b-9cc8-4792-b508-1b9b9f842355',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'b7fb4d'},body:JSON.stringify({sessionId:'b7fb4d',runId:'pre-fix-1',hypothesisId:'H1',location:'MeetingChatPage.tsx:loadChat:missingMeetingId',message:'meetingId missing from route params',data:{role:user?.role ?? null},timestamp:Date.now()})}).catch(()=>{});
-      // #endregion
       setPageError('Missing meeting ID.');
       setIsLoading(false);
       return;
     }
 
     try {
-      // #region agent log
-      fetch('http://127.0.0.1:7754/ingest/e019f77b-9cc8-4792-b508-1b9b9f842355',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'b7fb4d'},body:JSON.stringify({sessionId:'b7fb4d',runId:'pre-fix-1',hypothesisId:'H1',location:'MeetingChatPage.tsx:loadChat:start',message:'chat page load started',data:{meetingId,role:user?.role ?? null,userId:user?.id ?? null},timestamp:Date.now()})}).catch(()=>{});
-      // #endregion
       const meetingData = await apiRequest<MeetingRecord>(`/counselor-meetings/${meetingId}`);
       setMeeting(meetingData);
-      // #region agent log
-      fetch('http://127.0.0.1:7754/ingest/e019f77b-9cc8-4792-b508-1b9b9f842355',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'b7fb4d'},body:JSON.stringify({sessionId:'b7fb4d',runId:'pre-fix-1',hypothesisId:'H2',location:'MeetingChatPage.tsx:loadChat:meetingFetched',message:'meeting payload loaded',data:{meetingId:meetingData.id,chatId:meetingData.chatId ?? null,studentId:meetingData.studentId ?? null,agentId:meetingData.agentId ?? null,status:meetingData.status ?? null},timestamp:Date.now()})}).catch(()=>{});
-      // #endregion
 
       if (!meetingData.chatId) {
         setMessages([]);
@@ -99,14 +90,8 @@ const MeetingChatPage: React.FC = () => {
       const [messageData, userData] = await Promise.all(requests);
       setMessages((messageData as ChatMessageRecord[]) ?? []);
       setOtherParticipant((userData as DirectoryUser | undefined) ?? null);
-      // #region agent log
-      fetch('http://127.0.0.1:7754/ingest/e019f77b-9cc8-4792-b508-1b9b9f842355',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'b7fb4d'},body:JSON.stringify({sessionId:'b7fb4d',runId:'pre-fix-1',hypothesisId:'H3',location:'MeetingChatPage.tsx:loadChat:messagesFetched',message:'chat messages and counterpart resolved',data:{meetingId:meetingData.id,chatId:meetingData.chatId,messageCount:Array.isArray(messageData)?messageData.length:null,counterpartLoaded:Boolean(userData),counterpartId:counterpartId || null},timestamp:Date.now()})}).catch(()=>{});
-      // #endregion
       setPageError(null);
     } catch (error) {
-      // #region agent log
-      fetch('http://127.0.0.1:7754/ingest/e019f77b-9cc8-4792-b508-1b9b9f842355',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'b7fb4d'},body:JSON.stringify({sessionId:'b7fb4d',runId:'pre-fix-1',hypothesisId:'H4',location:'MeetingChatPage.tsx:loadChat:error',message:'chat page load failed',data:{meetingId:meetingId ?? null,error:parseApiError(error)},timestamp:Date.now()})}).catch(()=>{});
-      // #endregion
       setPageError(parseApiError(error));
     } finally {
       setIsLoading(false);
@@ -133,22 +118,13 @@ const MeetingChatPage: React.FC = () => {
 
     setIsSending(true);
     try {
-      // #region agent log
-      fetch('http://127.0.0.1:7754/ingest/e019f77b-9cc8-4792-b508-1b9b9f842355',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'b7fb4d'},body:JSON.stringify({sessionId:'b7fb4d',runId:'pre-fix-1',hypothesisId:'H5',location:'MeetingChatPage.tsx:handleSend:start',message:'chat send requested',data:{meetingId:meeting?.id ?? null,chatId:meeting?.chatId ?? null,contentLength:content.length},timestamp:Date.now()})}).catch(()=>{});
-      // #endregion
       await apiRequest(`/chats/${meeting.chatId}/messages`, {
         method: 'POST',
         body: { content },
       });
-      // #region agent log
-      fetch('http://127.0.0.1:7754/ingest/e019f77b-9cc8-4792-b508-1b9b9f842355',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'b7fb4d'},body:JSON.stringify({sessionId:'b7fb4d',runId:'pre-fix-1',hypothesisId:'H5',location:'MeetingChatPage.tsx:handleSend:success',message:'chat send completed',data:{meetingId:meeting?.id ?? null,chatId:meeting?.chatId ?? null},timestamp:Date.now()})}).catch(()=>{});
-      // #endregion
       setDraft('');
       await loadChat();
     } catch (error) {
-      // #region agent log
-      fetch('http://127.0.0.1:7754/ingest/e019f77b-9cc8-4792-b508-1b9b9f842355',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'b7fb4d'},body:JSON.stringify({sessionId:'b7fb4d',runId:'pre-fix-1',hypothesisId:'H5',location:'MeetingChatPage.tsx:handleSend:error',message:'chat send failed',data:{meetingId:meeting?.id ?? null,chatId:meeting?.chatId ?? null,error:parseApiError(error)},timestamp:Date.now()})}).catch(()=>{});
-      // #endregion
       setPageError(parseApiError(error));
     } finally {
       setIsSending(false);

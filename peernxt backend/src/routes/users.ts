@@ -124,6 +124,8 @@ router.post(
   })
 );
 
+const SELF_REGISTRATION_ROLES = ['student', 'ambassador'] as const;
+
 /** Self-registration for any role during direct Supabase onboarding flow. */
 router.post(
   '/register',
@@ -135,6 +137,9 @@ router.post(
     const parsed = createUserSchema.safeParse(req.body);
     if (!parsed.success) {
       return res.status(400).json({ error: 'Validation failed', details: parsed.error.flatten() });
+    }
+    if (!SELF_REGISTRATION_ROLES.includes(parsed.data.role as typeof SELF_REGISTRATION_ROLES[number])) {
+      return res.status(403).json({ error: 'Invalid role for self-registration.' });
     }
 
     const now = new Date().toISOString();

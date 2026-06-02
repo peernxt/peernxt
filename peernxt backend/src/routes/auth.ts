@@ -38,7 +38,9 @@ router.post(
     }
 
     // TODO: replace with WhatsApp Business API when approved
-    console.log(`[OTP] ${phone} → ${otp}`); // dev only, remove before prod
+    if (process.env.NODE_ENV !== 'production') {
+      console.log(`[OTP] ${phone} → ${otp}`);
+    }
 
     res.json({ maskedPhone, expiresIn: 300 });
   })

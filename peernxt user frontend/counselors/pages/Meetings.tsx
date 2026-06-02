@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+﻿import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CounselorLayout from '../components/CounselorLayout';
 import { Calendar, Clock, ExternalLink, MoreVertical } from 'lucide-react';
@@ -82,9 +82,6 @@ const CounselorMeetings: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => {
-                        // #region agent log
-                        fetch('http://127.0.0.1:7754/ingest/e019f77b-9cc8-4792-b508-1b9b9f842355',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'b7fb4d'},body:JSON.stringify({sessionId:'b7fb4d',runId:'pre-fix-1',hypothesisId:'H1',location:'CounselorMeetings.tsx:openChat',message:'counselor navigating to meeting chat from meetings list',data:{meetingId:String(meeting.id ?? ''),status:String(meeting.status ?? ''),hasMeetLink:Boolean(meeting.meetLink)},timestamp:Date.now()})}).catch(()=>{});
-                        // #endregion
                         navigate(`/counselor/meetings/${meeting.id}/chat`);
                       }}
                       className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-bold text-slate-700 transition-all hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600"
